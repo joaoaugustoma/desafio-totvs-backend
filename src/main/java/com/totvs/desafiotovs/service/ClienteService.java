@@ -1,7 +1,14 @@
 package com.totvs.desafiotovs.service;
 
-import org.springframework.stereotype.Service;
+import com.totvs.desafiotovs.dto.ClienteDTO;
+import com.totvs.desafiotovs.model.Cliente;
 
-@Service
-public class ClienteService {
+import java.util.List;
+
+public interface ClienteService {
+    List<ClienteDTO> listar();
+
+    ClienteDTO salvar(Cliente cliente);
+
+    ClienteDTO editar(Cliente cliente);
 }
