@@ -8,6 +8,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegraNegocioException extends RuntimeException {
     private final List<RegraNegocioErroMensagem> erros = new ArrayList<>();
+
     public RegraNegocioException(String mensagemErro, List<String> erros) {
         super(mensagemErro);
         erros.forEach(erro -> this.erros.add(new RegraNegocioErroMensagem(erro)));

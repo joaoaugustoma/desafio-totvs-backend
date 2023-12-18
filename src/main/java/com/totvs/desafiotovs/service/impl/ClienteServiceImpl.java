@@ -3,16 +3,18 @@ package com.totvs.desafiotovs.service.impl;
 import com.totvs.desafiotovs.dto.ClienteDTO;
 import com.totvs.desafiotovs.exception.RegraNegocioException;
 import com.totvs.desafiotovs.mapper.ClienteMapper;
-import com.totvs.desafiotovs.mapper.ClienteTelefoneMapper;
 import com.totvs.desafiotovs.model.Cliente;
 import com.totvs.desafiotovs.model.ClienteTelefone;
 import com.totvs.desafiotovs.repository.ClienteRespository;
 import com.totvs.desafiotovs.repository.ClienteTelefoneRepository;
 import com.totvs.desafiotovs.service.ClienteService;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -23,14 +25,11 @@ public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteTelefoneRepository clienteTelefoneRepository;
 
-    private final ClienteTelefoneMapper clienteTelefoneMapper;
-
     private final ClienteMapper clienteMapper;
 
-    public ClienteServiceImpl(ClienteRespository clienteRepository, ClienteTelefoneRepository clienteTelefoneRepository, ClienteTelefoneMapper clienteTelefoneMapper, ClienteMapper clienteMapper) {
+    public ClienteServiceImpl(ClienteRespository clienteRepository, ClienteTelefoneRepository clienteTelefoneRepository, ClienteMapper clienteMapper) {
         this.clienteRepository = clienteRepository;
         this.clienteTelefoneRepository = clienteTelefoneRepository;
-        this.clienteTelefoneMapper = clienteTelefoneMapper;
         this.clienteMapper = clienteMapper;
     }
 
@@ -42,14 +41,9 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public ClienteDTO salvar(Cliente cliente) {
         List<String> erros = new ArrayList<>();
-        if(validaRegraClienteAntesSalvar(cliente, erros)){
-            clienteRepository.save(cliente);
 
-            cliente.getTelefones().forEach(telefone -> {
-                telefone.setCliente(cliente);
-                clienteTelefoneRepository.save(telefone);
-            });
-
+        if (validaRegraClienteAntesSalvar(cliente, erros)) {
+            salvarClienteETelefones(cliente);
             return clienteMapper.toDTO(cliente);
         } else {
             throw new RegraNegocioException("Cliente não pode ser cadastrado.", erros);
@@ -60,23 +54,23 @@ public class ClienteServiceImpl implements ClienteService {
     public ClienteDTO editar(Cliente cliente) {
         List<String> erros = new ArrayList<>();
 
-        if(cliente.getId() == null) {
+        if (cliente.getId() == null) {
             throw new RegraNegocioException("Id do cliente é obrigatório.", erros);
         }
 
-        if(validaRegraClienteAntesSalvar(cliente, erros)){
+        if (validaRegraClienteAntesSalvar(cliente, erros)) {
             List<ClienteTelefone> clienteTelefones = clienteTelefoneRepository.findAllByClienteId(cliente.getId());
 
             clienteTelefones.forEach(clienteTelefonesAntigo -> {
                 AtomicBoolean existeTelefone = new AtomicBoolean(false);
 
                 cliente.getTelefones().forEach(telefoneNovo -> {
-                    if(clienteTelefonesAntigo.getTelefone().equals(telefoneNovo.getTelefone())){
+                    if (clienteTelefonesAntigo.getTelefone().equals(telefoneNovo.getTelefone())) {
                         telefoneNovo.setId(clienteTelefonesAntigo.getId());
                         existeTelefone.set(true);
                     }
 
-                    if(!existeTelefone.get()){
+                    if (!existeTelefone.get()) {
                         clienteTelefoneRepository.delete(clienteTelefonesAntigo);
                     }
                 });
@@ -95,26 +89,79 @@ public class ClienteServiceImpl implements ClienteService {
         }
     }
 
-    //TODO validar clientes antes de salver
-    private boolean validaRegraClienteAntesSalvar(Cliente cliente, List<String> erros) {
-        if(cliente.getNome() == null || cliente.getNome().isEmpty()){
-            erros.add("Nome do cliente é obrigatório.");
-        } else {
-            if(cliente.getNome().length() <= 10){
-                erros.add("Nome do cliente deve ter mais de 10 caracteres.");
-            } else if (cliente.getId() == null && clienteRepository.findClienteByNome(cliente.getNome()) != null) {
-                erros.add("Nome do cliente já cadastrado.");
-            }
+    private void salvarClienteETelefones(Cliente cliente) {
+        clienteRepository.save(cliente);
+
+        for (ClienteTelefone telefone : cliente.getTelefones()) {
+            telefone.setCliente(cliente);
+            clienteTelefoneRepository.save(telefone);
         }
-        validaRegraTelefoneAntesSalvar(cliente, erros);
+    }
+
+    private boolean validaRegraClienteAntesSalvar(Cliente cliente, List<String> erros) {
+        validaNomeCliente(cliente, erros);
+        validaRegrasTelefone(cliente, erros);
+
         return erros.isEmpty();
     }
 
-    //TODO validar telefones antes de salver
-    private void validaRegraTelefoneAntesSalvar(Cliente cliente, List<String> erros) {
+    private void validaNomeCliente(Cliente cliente, List<String> erros) {
+        if (cliente.getNome() == null || cliente.getNome().isEmpty()) {
+            erros.add("Nome do cliente é obrigatório.");
+        } else {
+            if (cliente.getNome().length() <= 10) {
+                erros.add("Nome do cliente deve ter mais de 10 caracteres.");
+            } else if (clienteRepository.findClienteByNome(cliente.getNome()) != null) {
+                erros.add("Nome do cliente já cadastrado.");
+            }
+        }
     }
 
-    //TODO validar telefones unicos
-    private void validaRegraTelefoneUnico(Cliente cliente, List<String> erros) {
+    private void validaRegrasTelefone(Cliente cliente, List<String> erros) {
+        if (cliente.getTelefones() == null || cliente.getTelefones().isEmpty()) {
+            erros.add("Insira no mínimo 1 telefone.");
+        } else {
+            if (validaRegraTelefoneUnico(cliente, erros)) {
+                int index = 0;
+
+                for (ClienteTelefone clienteTelefone : cliente.getTelefones()) {
+                    index++;
+                    if (Strings.isBlank(clienteTelefone.getTelefone())) {
+                        erros.add("O " + index + "º telefone está nulo ou vazio.");
+                    } else {
+                        if (!validaFormatoTelefone(clienteTelefone.getTelefone())) {
+                            erros.add("O " + index + "º telefone (" + clienteTelefone.getTelefone() + ") não está no formato correto.");
+                        } else {
+                            ClienteTelefone clienteTelefoneByTelefone = clienteTelefoneRepository.findClienteTelefoneByTelefone(clienteTelefone.getTelefone());
+
+                            if (clienteTelefoneByTelefone != null) {
+                                if (clienteTelefone.getId() == null || !clienteTelefoneByTelefone.getCliente().getId().equals(clienteTelefone.getId())) {
+                                    erros.add("O " + index + "º telefone (" + clienteTelefone.getTelefone() + ") já está sendo utilizado.");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean validaFormatoTelefone(String telefone) {
+        String regex = "\\d{11}";
+        return telefone.matches(regex);
+    }
+
+    private boolean validaRegraTelefoneUnico(Cliente cliente, List<String> erros) {
+        Set<String> telefones = new HashSet<>();
+
+        boolean isTelefoneRepetido = cliente.getTelefones().stream()
+                .map(ClienteTelefone::getTelefone)
+                .anyMatch(phone -> !telefones.add(phone));
+
+        if (isTelefoneRepetido) {
+            erros.add("Foram encontrados números de telefone duplicados: " + telefones);
+        }
+
+        return !isTelefoneRepetido;
     }
 }

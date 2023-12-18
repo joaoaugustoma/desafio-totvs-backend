@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ClienteTelefoneRepository extends JpaRepository<ClienteTelefone, Long> {
     List<ClienteTelefone> findAllByClienteId(Long id);
+
+    ClienteTelefone findClienteTelefoneByTelefone(String telefone);
 }
