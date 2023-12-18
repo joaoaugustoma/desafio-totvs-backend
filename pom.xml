@@ -6,13 +6,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.2.0</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.totvs</groupId>
 	<artifactId>desafio-tovs</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1</version>
 	<name>desafio-tovs</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Desafio TOTVS - Backend</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
