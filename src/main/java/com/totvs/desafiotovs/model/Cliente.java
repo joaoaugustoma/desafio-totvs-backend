@@ -18,10 +18,13 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "nome", nullable = false, unique = true)
     private String nome;
 
+    @Column(name = "endereco")
     private String endereco;
 
+    @Column(name = "bairro")
     private String bairro;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.REMOVE)
