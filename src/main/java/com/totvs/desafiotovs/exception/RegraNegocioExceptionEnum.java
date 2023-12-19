@@ -15,7 +15,7 @@ public enum RegraNegocioExceptionEnum {
     TELEFONE_FORMATO_INCORRETO("O %dº telefone %s não está no formato correto."),
     TELEFONE_EXISTENTE("O %dº telefone %s já está sendo utilizado.");
 
-    private String mensagem;
+    private final String mensagem;
 
     RegraNegocioExceptionEnum(String mensagem) {
         this.mensagem = mensagem;
