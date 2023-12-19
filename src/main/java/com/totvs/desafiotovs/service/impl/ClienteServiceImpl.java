@@ -2,6 +2,7 @@ package com.totvs.desafiotovs.service.impl;
 
 import com.totvs.desafiotovs.dto.ClienteDTO;
 import com.totvs.desafiotovs.exception.RegraNegocioException;
+import com.totvs.desafiotovs.exception.RegraNegocioExceptionEnum;
 import com.totvs.desafiotovs.mapper.ClienteMapper;
 import com.totvs.desafiotovs.model.Cliente;
 import com.totvs.desafiotovs.model.ClienteTelefone;
@@ -98,7 +99,7 @@ public class ClienteServiceImpl implements ClienteService {
         }
     }
 
-    private boolean validaRegraClienteAntesSalvar(Cliente cliente, List<String> erros) {
+    public boolean validaRegraClienteAntesSalvar(Cliente cliente, List<String> erros) {
         validaNomeCliente(cliente, erros);
         validaRegrasTelefone(cliente, erros);
 
@@ -107,19 +108,19 @@ public class ClienteServiceImpl implements ClienteService {
 
     private void validaNomeCliente(Cliente cliente, List<String> erros) {
         if (cliente.getNome() == null || cliente.getNome().isEmpty()) {
-            erros.add("Nome do cliente é obrigatório.");
+            erros.add(RegraNegocioExceptionEnum.NOME_CLIENTE_OBRIGATORIO.getMensagem());
         } else {
             if (cliente.getNome().length() <= 10) {
-                erros.add("Nome do cliente deve ter mais de 10 caracteres.");
+                erros.add(RegraNegocioExceptionEnum.NOME_CLIENTE_MENOR_QUE_10.getMensagem());
             } else if (clienteRepository.findClienteByNome(cliente.getNome()) != null) {
                 erros.add("Nome do cliente já cadastrado.");
             }
         }
     }
 
-    private void validaRegrasTelefone(Cliente cliente, List<String> erros) {
+    public void validaRegrasTelefone(Cliente cliente, List<String> erros) {
         if (cliente.getTelefones() == null || cliente.getTelefones().isEmpty()) {
-            erros.add("Insira no mínimo 1 telefone.");
+            erros.add(RegraNegocioExceptionEnum.CLIENTE_SEM_TELEFONE.getMensagem());
         } else {
             if (validaRegraTelefoneUnico(cliente, erros)) {
                 int index = 0;
@@ -127,21 +128,22 @@ public class ClienteServiceImpl implements ClienteService {
                 for (ClienteTelefone clienteTelefone : cliente.getTelefones()) {
                     index++;
                     if (Strings.isBlank(clienteTelefone.getTelefone())) {
-                        erros.add("O " + index + "º telefone está nulo ou vazio.");
+                        erros.add(RegraNegocioExceptionEnum.TELEFONE_NULO_OU_VAZIO.formatMessage(index));
                     } else {
                         if (!validaFormatoTelefone(clienteTelefone.getTelefone())) {
-                            erros.add("O " + index + "º telefone (" + clienteTelefone.getTelefone() + ") não está no formato correto.");
+                            erros.add(RegraNegocioExceptionEnum.TELEFONE_FORMATO_INCORRETO.formatMessage(index, clienteTelefone.getTelefone()));
                         } else {
                             ClienteTelefone clienteTelefoneByTelefone = clienteTelefoneRepository.findClienteTelefoneByTelefone(clienteTelefone.getTelefone());
 
                             if (clienteTelefoneByTelefone != null) {
                                 if (clienteTelefone.getId() == null || !clienteTelefoneByTelefone.getCliente().getId().equals(clienteTelefone.getId())) {
-                                    erros.add("O " + index + "º telefone (" + clienteTelefone.getTelefone() + ") já está sendo utilizado.");
+                                    erros.add(RegraNegocioExceptionEnum.TELEFONE_EXISTENTE.formatMessage(index, clienteTelefone.getTelefone()));
                                 }
                             }
                         }
                     }
                 }
+
             }
         }
     }
@@ -151,7 +153,7 @@ public class ClienteServiceImpl implements ClienteService {
         return telefone.matches(regex);
     }
 
-    private boolean validaRegraTelefoneUnico(Cliente cliente, List<String> erros) {
+    public boolean validaRegraTelefoneUnico(Cliente cliente, List<String> erros) {
         Set<String> telefones = new HashSet<>();
 
         boolean isTelefoneRepetido = cliente.getTelefones().stream()

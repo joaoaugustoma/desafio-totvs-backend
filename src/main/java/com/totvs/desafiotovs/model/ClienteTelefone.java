@@ -1,6 +1,7 @@
 package com.totvs.desafiotovs.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "cliente_telefone")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ClienteTelefone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
