@@ -118,7 +118,7 @@ public class ClienteServiceImplTest {
         List<String> erros = exception.getErrosMensagem().stream().map(RegraNegocioErroMensagem::getErroMensagem).toList();
 
         assertTrue(erros.contains(RegraNegocioExceptionEnum.NOME_CLIENTE_OBRIGATORIO.getMensagem()));
-        assertTrue(erros.contains(RegraNegocioExceptionEnum.NOME_CLIENTE_MENOR_QUE_10.getMensagem());
+        assertTrue(erros.contains(RegraNegocioExceptionEnum.NOME_CLIENTE_MENOR_QUE_10.getMensagem()));
         assertTrue(erros.contains(RegraNegocioExceptionEnum.CLIENTE_SEM_TELEFONE.getMensagem()));
     }
 
