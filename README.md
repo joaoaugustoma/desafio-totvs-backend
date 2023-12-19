@@ -22,7 +22,7 @@ spring.datasource.password=sua_senha
 ## Executando o Projeto
 
 1. Clone o repositório para o seu ambiente local.
-2. Instale todas as dependências do Manven.
+2. Instale todas as dependências do Maven.
 3. Rode o projeto a partir da classe DesafioTotvsApplication.java.
 
 ## Uso da API
