@@ -161,7 +161,7 @@ public class ClienteServiceImpl implements ClienteService {
                 .anyMatch(phone -> !telefones.add(phone));
 
         if (isTelefoneRepetido) {
-            erros.add("Foram encontrados números de telefone duplicados: " + telefones);
+            erros.add(RegraNegocioExceptionEnum.TELEFONE_DUPLICADO.formatMessage(telefones));
         }
 
         return !isTelefoneRepetido;
