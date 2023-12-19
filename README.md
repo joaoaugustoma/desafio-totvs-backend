@@ -12,11 +12,12 @@ Bem-vindo ao repositório do Desafio de Backend para a vaga de emprego na TOTVS.
 1. Crie um banco de dados no seu PostgreSQL.
 2. Abra o arquivo 'application.properties' que se econtra no diretório 'src/main/resources'.
 3. Modifique as configurações do banco de dados de acordo com suas credenciais:
-`
+
+```
 spring.datasource.url=jdbc:postgresql://localhost:5432/seu_banco_de_dados
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
-`
+```
 
 ## Executando o Projeto
 
