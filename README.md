@@ -2,6 +2,9 @@
 
 Bem-vindo ao repositório do Desafio de Backend para a vaga de emprego na TOTVS. Este projeto consiste em uma API de cliente desenvolvida em Spring Boot com JDK 21, permitindo a criação, edição e listagem de clientes. O banco de dados utilizado é o PostgreSQL.
 
+Para o projeto Frontend acesse essa URL: https://github.com/joaoaugustoma/desafio-totvs-frontend
+****
+
 ## Requisitos
 1. PostgreSQL 16.1
 2. JDK 21
