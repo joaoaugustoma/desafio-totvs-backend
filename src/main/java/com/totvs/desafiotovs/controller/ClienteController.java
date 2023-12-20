@@ -40,24 +40,4 @@ public class ClienteController {
         }
     }
 
-    @PutMapping
-    public ResponseEntity<?> editar(@RequestBody Cliente cliente) {
-        try {
-            validarClienteParaEdicao(cliente);
-
-            ClienteDTO clienteCadastrado = clienteService.editar(cliente);
-            return ResponseEntity.ok(clienteCadastrado);
-        } catch (RegraNegocioException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(e.getErrosMensagem());
-        }
-    }
-
-    private void validarClienteParaEdicao(Cliente cliente) {
-        if (cliente.getId() == null) {
-            throw new RegraNegocioException("Id do cliente é obrigatório.", Collections.singletonList("Id do cliente é obrigatório."));
-        }
-    }
-
 }

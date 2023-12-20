@@ -9,6 +9,4 @@ public interface ClienteService {
     List<ClienteDTO> listar();
 
     ClienteDTO salvar(Cliente cliente);
-
-    ClienteDTO editar(Cliente cliente);
 }

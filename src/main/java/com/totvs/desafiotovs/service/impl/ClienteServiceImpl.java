@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,45 +47,6 @@ public class ClienteServiceImpl implements ClienteService {
             return clienteMapper.toDTO(cliente);
         } else {
             throw new RegraNegocioException("Cliente não pode ser cadastrado.", erros);
-        }
-    }
-
-    @Override
-    public ClienteDTO editar(Cliente cliente) {
-        List<String> erros = new ArrayList<>();
-
-        if (cliente.getId() == null) {
-            throw new RegraNegocioException("Id do cliente é obrigatório.", erros);
-        }
-
-        if (validaRegraClienteAntesSalvar(cliente, erros)) {
-            List<ClienteTelefone> clienteTelefones = clienteTelefoneRepository.findAllByClienteId(cliente.getId());
-
-            clienteTelefones.forEach(clienteTelefonesAntigo -> {
-                AtomicBoolean existeTelefone = new AtomicBoolean(false);
-
-                cliente.getTelefones().forEach(telefoneNovo -> {
-                    if (clienteTelefonesAntigo.getTelefone().equals(telefoneNovo.getTelefone())) {
-                        telefoneNovo.setId(clienteTelefonesAntigo.getId());
-                        existeTelefone.set(true);
-                    }
-
-                    if (!existeTelefone.get()) {
-                        clienteTelefoneRepository.delete(clienteTelefonesAntigo);
-                    }
-                });
-            });
-
-            clienteRepository.save(cliente);
-
-            cliente.getTelefones().forEach(telefone -> {
-                telefone.setCliente(cliente);
-                clienteTelefoneRepository.save(telefone);
-            });
-
-            return clienteMapper.toDTO(cliente);
-        } else {
-            throw new RegraNegocioException("Cliente não pode ser editado.", erros);
         }
     }
 
