@@ -49,22 +49,5 @@ spring.datasource.password=sua_senha
 }
 ```
 
-**Editar Cliente**
-- Endpoint: `PUT /cliente`
-- Body
-```
-{
-    "id": 1,
-    "nome": "João Augusto Moreira",
-    "endereco": "Rua 2",
-    "bairro": "Morada Nova",
-    "telefones": [
-        {
-            "telefone": "6291866794"
-        }
-    ]
-}
-```
-
 **Listar Clientes**
 - Endpoint: `GET /cliente`
